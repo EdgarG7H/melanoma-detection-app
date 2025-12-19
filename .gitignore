@@ -4,6 +4,11 @@ melanoma_env/
 # Dataset
 data/
 
+# Modelos entrenados (MUY IMPORTANTE)
+*.h5
+*.keras
+models/
+
 # Archivos temporales de Python
 __pycache__/
 *.pyc
