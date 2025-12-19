@@ -1,95 +1,57 @@
-from flask import Flask, render_template, request
-import tensorflow as tf
-import numpy as np
 import os
+import gdown
+import tensorflow as tf
+from flask import Flask, render_template, request
 from tensorflow.keras.preprocessing import image
+import numpy as np
 
-# ===============================
-# CONFIGURACIÓN DE RUTAS
-# ===============================
-APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(APP_ROOT)
+# =========================
+# CONFIGURACIÓN
+# =========================
+MODEL_PATH = "models/mobilenetv2.keras"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=10pZ8XKU0HywGVDKXrsBRdRX8H_NGHIvj"
+IMG_SIZE = (224, 224)
 
-MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "mobilenetv2.keras")
-UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, "static", "uploads")
+# =========================
+# DESCARGAR MODELO SI NO EXISTE
+# =========================
+os.makedirs("models", exist_ok=True)
 
-IMAGE_SIZE = (224, 224)
+if not os.path.exists(MODEL_PATH):
+    print("📌 Descargando modelo desde Google Drive...")
+    gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
 
-# ===============================
-# INICIALIZAR FLASK
-# ===============================
-app = Flask(
-    __name__,
-    template_folder=os.path.join(PROJECT_ROOT, "templates"),
-    static_folder=os.path.join(PROJECT_ROOT, "static")
-)
-
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-# ===============================
-# CARGAR MODELO
-# ===============================
-print("📌 Cargando modelo...")
+print("✅ Cargando modelo...")
 model = tf.keras.models.load_model(MODEL_PATH)
-print("✅ Modelo cargado correctamente")
 
-# ===============================
-# FUNCIONES
-# ===============================
-def preprocess_image(img_path):
-    img = image.load_img(img_path, target_size=IMAGE_SIZE)
-    img_array = image.img_to_array(img) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
-    return img_array
+# =========================
+# FLASK APP
+# =========================
+app = Flask(__name__)
 
-def predict_image(img_path):
-    img_array = preprocess_image(img_path)
-    prob = model.predict(img_array)[0][0]
-
-    if prob < 0.3:
-        clase = "BENIGNO"
-    elif prob < 0.6:
-        clase = "RIESGO MODERADO"
-    else:
-        clase = "MELANOMA (ALTO RIESGO)"
-
-    return clase, float(prob)
-
-# ===============================
-# RUTA PRINCIPAL
-# ===============================
 @app.route("/", methods=["GET", "POST"])
 def index():
-    resultado = None
-    probabilidad = None
-    imagen = None
-    error = None
+    prediction = None
 
     if request.method == "POST":
-        if "image" not in request.files:
-            error = "No se subió ninguna imagen"
-        else:
-            file = request.files["image"]
+        img_file = request.files["image"]
 
-            if file.filename == "":
-                error = "Archivo inválido"
-            else:
-                filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
-                file.save(filepath)
+        img_path = os.path.join("static", img_file.filename)
+        img_file.save(img_path)
 
-                resultado, probabilidad = predict_image(filepath)
-                imagen = file.filename
+        img = image.load_img(img_path, target_size=IMG_SIZE)
+        img_array = image.img_to_array(img) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
 
-    return render_template(
-        "index.html",
-        resultado=resultado,
-        probabilidad=probabilidad,
-        imagen=imagen,
-        error=error
-    )
+        result = model.predict(img_array)[0][0]
 
-# ===============================
-# EJECUTAR APP
-# ===============================
+        prediction = "Melanoma" if result > 0.5 else "No Melanoma"
+
+    return render_template("index.html", prediction=prediction)
+
+# =========================
+# RUN
+# =========================
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

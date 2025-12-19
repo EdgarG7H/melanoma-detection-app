@@ -4,15 +4,15 @@ melanoma_env/
 # Dataset
 data/
 
-# Modelos entrenados (MUY IMPORTANTE)
+# Modelos entrenados (NO subir)
+models/
 *.h5
 *.keras
-models/
 
-# Archivos temporales de Python
+# Python
 __pycache__/
 *.pyc
 
-# Archivos del sistema
+# Sistema
 .DS_Store
 Thumbs.db
