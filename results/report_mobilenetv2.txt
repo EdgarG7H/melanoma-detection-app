@@ -1,0 +1,4 @@
+Modelo: mobilenetv2
+Mejor val_accuracy: 0.8967
+Cumple 80%: SI
+Modelo guardado en: C:\Users\Edgar G\Downloads\melanoma_project\models\mobilenetv2.keras

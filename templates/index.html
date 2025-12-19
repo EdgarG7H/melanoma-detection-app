@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detección de Melanoma</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        img {
+            max-width: 250px;
+            margin-top: 15px;
+            border-radius: 8px;
+        }
+
+        .benigno { color: green; }
+        .moderado { color: orange; }
+        .alto { color: red; }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h2>Detección de Melanoma</h2>
+        <p>Sube una imagen de la piel</p>
+
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" required>
+            <br>
+            <button type="submit">Analizar imagen</button>
+        </form>
+
+        {% if error %}
+            <p style="color:red;">{{ error }}</p>
+        {% endif %}
+
+        {% if resultado %}
+            <hr>
+
+            <h3>Resultado</h3>
+
+            {% if resultado == "BENIGNO" %}
+                <p class="benigno"><strong>{{ resultado }}</strong></p>
+            {% elif resultado == "RIESGO MODERADO" %}
+                <p class="moderado"><strong>{{ resultado }}</strong></p>
+            {% else %}
+                <p class="alto"><strong>{{ resultado }}</strong></p>
+            {% endif %}
+
+            <p>Probabilidad: {{ (probabilidad * 100) | round(2) }}%</p>
+
+            {% if imagen %}
+                <img src="{{ url_for('static', filename='uploads/' + imagen) }}">
+            {% endif %}
+        {% endif %}
+    </div>
+</body>
+</html>

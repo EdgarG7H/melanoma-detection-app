@@ -1,0 +1,13 @@
+# Entorno virtual
+melanoma_env/
+
+# Dataset
+data/
+
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db

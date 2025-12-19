@@ -1,0 +1,4 @@
+Modelo: resnet50
+Mejor val_accuracy: 0.8947
+Cumple 80%: SI
+Modelo guardado en: C:\Users\Edgar G\Downloads\melanoma_project\models\resnet50.keras
